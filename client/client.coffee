@@ -3,6 +3,34 @@ Array::last = ->
 
 $ ->
   window.wiki = {}
+  Environment = Backbone.Collection.extend
+    foo: "i am the environment"
+
+  window.environment = new Environment
+
+  window.environment.bind "add", () =>
+    window.pc_view.render()
+
+  Item = Backbone.Model.extend()
+
+  ParagraphCounter = Backbone.View.extend
+    model : window.environment
+    tagName: "p"
+    className: "document-row"
+    render: () ->
+      if $('#counter')[0]
+        $('#counter').html('<p id="counter" style="clear:both">Count:<span class="count">'+this.model.length+'</span></p>')
+      else
+        $('body').append('<p id="counter" style="clear:both">Count:<span class="count">'+this.model.length+'</span></p>')
+
+
+
+  window.pc_view = new ParagraphCounter
+  pc_view.bind 'all', () =>
+    alert('event')
+
+  pc_view.render()
+
 
 # FUNCTIONS used by plugins and elsewhere
 
@@ -243,6 +271,7 @@ $ ->
         $("<div />").addClass(className).appendTo(pageElement)
 
       $.each page.story, (i, item) ->
+        environment.add(new Item(item))
         div = $("<div class=\"item #{item.type}\" id=\"#{item.id}\" />")
         storyElement.append div
         try

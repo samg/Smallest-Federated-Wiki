@@ -1,11 +1,36 @@
 (function() {
-  var __slice = Array.prototype.slice;
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __slice = Array.prototype.slice;
   Array.prototype.last = function() {
     return this[this.length - 1];
   };
   $(function() {
-    var addToJournal, bindDragAndDrop, formatTime, getItem, getPlugin, pushToLocal, pushToServer, putAction, randomByte, randomBytes, refresh, resolveLinks, scripts, textEditor, useLocalStorage;
+    var Environment, Item, ParagraphCounter, addToJournal, bindDragAndDrop, formatTime, getItem, getPlugin, pushToLocal, pushToServer, putAction, randomByte, randomBytes, refresh, resolveLinks, scripts, textEditor, useLocalStorage;
     window.wiki = {};
+    Environment = Backbone.Collection.extend({
+      foo: "i am the environment"
+    });
+    window.environment = new Environment;
+    window.environment.bind("add", __bind(function() {
+      return window.pc_view.render();
+    }, this));
+    Item = Backbone.Model.extend();
+    ParagraphCounter = Backbone.View.extend({
+      model: window.environment,
+      tagName: "p",
+      className: "document-row",
+      render: function() {
+        if ($('#counter')[0]) {
+          return $('#counter').html('<p id="counter" style="clear:both">Count:<span class="count">' + this.model.length + '</span></p>');
+        } else {
+          return $('body').append('<p id="counter" style="clear:both">Count:<span class="count">' + this.model.length + '</span></p>');
+        }
+      }
+    });
+    window.pc_view = new ParagraphCounter;
+    pc_view.bind('all', __bind(function() {
+      return alert('event');
+    }, this));
+    pc_view.render();
     randomByte = function() {
       return (((1 + Math.random()) * 0x100) | 0).toString(16).substring(1);
     };
@@ -336,6 +361,7 @@
         }), storyElement = _ref[0], journalElement = _ref[1], footerElement = _ref[2];
         $.each(page.story, function(i, item) {
           var div, plugin;
+          environment.add(new Item(item));
           div = $("<div class=\"item " + item.type + "\" id=\"" + item.id + "\" />");
           storyElement.append(div);
           try {
